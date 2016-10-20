@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>워터멜론</title>
+
+	<link type="text/css" rel="stylesheet" href="{{url_for('static', filename='css/materialize.min.css')}}" media="screen,projection"/>
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+</head>
+
+<body class="grey lighten-4">
+	<div class="navbar-fixed">
+		<nav class="indigo">
+			<div class="container">
+				<div class="nav-wrapper">
+					<form method="post">
+						<div class="input-field">
+							<input placeholder="검색" id="search" type="search" name="search" required>
+							<label for="search"><i class="mdi-action-search"></i></label>
+							<i class="mdi-navigation-close"></i>
+						</div>
+					</form>
+				</div>
+			</div>
+		</nav>
+	</div>
+	<div class="container">
+		<ul id="search_result" class="collection z-depth-1"></ul>
+	</div>
+
+	<div class="fixed-action-btn">
+		<a href="/public" class="btn-floating btn-large pink">
+			<i class="large mdi-content-clear"></i>
+		</a>
+	</div>
+
+	<script type="text/javascript" src="{{url_for('static', filename='js/materialize.min.js')}}"></script>
+	<script>
+		$(document).ready(function(){
+			$(".button-collapse").sideNav();
+
+			var text = "{{data}}";
+			var decoded = $('<div/>').html(text).text();
+			$("#search_result").html(decoded);
+		});
+	</script>
+</body>
+</html>

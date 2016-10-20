@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>asdfasd</title>
+</head>
+<body>
+<div id="demo"></div>
+<script>
+var x = document.getElementById("demo");
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition);
+    } else {
+        x.innerHTML = "ㅓ is not supported by this browser.";
+    }
+}
+function showPosition(position) {
+    x.innerHTML = "Latitude: " + position.coords.latitude + 
+    "<br>Longitude: " + position.coords.longitude; 
+}
+getLocation();
+</script>
+</body>
+</html>

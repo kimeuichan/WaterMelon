@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>워터멜론</title>
+
+	<link type="text/css" rel="stylesheet" href="{{url_for('static', filename='css/materialize.min.css')}}" media="screen,projection"/>
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+</head>
+
+<body class="grey lighten-4">
+	<div class="navbar-fixed">
+		<nav class="indigo">
+			<div class="container">
+				<div class="nav-wrapper z-depth-1">
+					<a href="#" data-activates="slide-out" class="button-collapse show-on-large"><i class="mdi-navigation-menu"></i></a>
+					<a href="#!" class="brand-logo">플레이리스트</a>
+					<ul class="right">
+						<li>
+							<a class="modal-trigger" href="#play"><i class="mdi-av-play-arrow"></i></a>
+						</li>
+
+					</ul>
+					<ul id="slide-out" class="side-nav">
+						<li><a href="/"><i class="mdi-editor-insert-chart left"></i>TOP 100</a></li>
+						<li><a href="/public/search"><i class="mdi-action-search left"></i>검색</a></li>
+						<li class="divider"></li>
+						<li><a href="/logout"><i class="mdi-action-settings-power left"></i>로그아웃</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</div>
+
+	<div class="container">
+		<ul class="collection z-depth-1">
+			{% for order in playlist %}
+			<li class="collection-item avatar">
+				<i class="mdi-av-queue-music circle pink"></i>
+				{% for column in order %}
+				{{ column }}
+				<a href="{{ url_for('delete_music', songName=column) }}" class="secondary-content"><i class="mdi-content-clear"></i></a>
+				{% endfor %}
+			</li>
+			{% endfor %}
+		</ul>
+	</div>
+	<div id="play" class="modal bottom-sheet">
+		<script type="text/javascript">
+			var music_ids = "{{music_id}}".split(',');
+			var music_id_first = music_ids.shift();
+		</script>
+		<div class="modal-content center">
+			
+			<div id="whateverID">
+					<iframe id="player" width="300" height="200" frameborder="0" title="YouTube video player" type="text/html" src=""></iframe>
+			</div>
+			<a href="javascript:void callPlayer('whateverID','stopVideo')" class="btn-floating btn-large waves-effect waves-light pink"><i class="mdi-av-stop"></i></a>
+			<a href="javascript:void callPlayer('whateverID','pauseVideo')" class="btn-floating btn-large waves-effect waves-light pink"><i class="mdi-av-pause"></i></a>
+			<a href="javascript:void callPlayer('whateverID','nextVideo')" class="btn-floating btn-large waves-effect waves-light pink"><i class="mdi-av-skip-previous"></i></a>  
+			<a href="javascript:void callPlayer('whateverID','playVideo')" class="btn-floating btn-large waves-effect waves-light pink"><i class="mdi-av-play-arrow"></i></a>
+			<a href="javascript:void callPlayer('whateverID','previousVideo')" class="btn-floating btn-large waves-effect waves-light pink"><i class="mdi-av-skip-next"></i></a>
+		</div>
+		<script type="text/javascript">
+			document.getElementById("player").src = "http://www.youtube.com/embed/"+music_id_first+"?playlist="+music_ids+"&controls=0&showinfo=0&autoplay=1&rel=0&enablejsapi=1";
+		</script>
+	</div>
+
+	<div class="fixed-action-btn">
+		<a id="download" class="btn-floating btn-large pink">
+			<i class="large mdi-file-file-download"></i>
+		</a>
+	</div>
+
+	<script type="text/javascript" src="{{url_for('static', filename='js/materialize.min.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/jquery.twbsPagination.min.js')}}"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/jquery.fileDownload.js')}}"></script>
+	<script>
+		$(document).ready(function(){
+			$(".button-collapse").sideNav();
+
+			$SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
+			$('#download').click(function(){ 
+				arr = "{{music_id}}"
+				$.getJSON($SCRIPT_ROOT + '/public/download',{
+					id: arr
+				}, function(data){
+					id = data.url.split(',');
+					for(var i=0; i<id.length-1; i++){
+						$.fileDownload(id[i]);
+					}
+				});
+
+			});
+			$('.modal-trigger').leanModal();
+		});
+	</script>
+	<script type="text/javascript">
+/**
+ * @author       Rob W <gwnRob@gmail.com>
+ * @website      http://stackoverflow.com/a/7513356/938089
+ * @version      20131010
+ * @description  Executes function on a framed YouTube video (see website link)
+ *               For a full list of possible functions, see:
+ *               https://developers.google.com/youtube/js_api_reference
+ * @param String frame_id The id of (the div containing) the frame
+ * @param String func     Desired function to call, eg. "playVideo"
+ *        (Function)      Function to call when the player is ready.
+ * @param Array  args     (optional) List of arguments to pass to function func*/
+ function callPlayer(frame_id, func, args) {
+ 	if (window.jQuery && frame_id instanceof jQuery) frame_id = frame_id.get(0).id;
+ 	var iframe = document.getElementById(frame_id);
+ 	if (iframe && iframe.tagName.toUpperCase() != 'IFRAME') {
+ 		iframe = iframe.getElementsByTagName('iframe')[0];
+ 	}
+
+    // When the player is not ready yet, add the event to a queue
+    // Each frame_id is associated with an own queue.
+    // Each queue has three possible states:
+    //  undefined = uninitialised / array = queue / 0 = ready
+    if (!callPlayer.queue) callPlayer.queue = {};
+    var queue = callPlayer.queue[frame_id],
+    domReady = document.readyState == 'complete';
+
+    if (domReady && !iframe) {
+        // DOM is ready and iframe does not exist. Log a message
+        window.console && console.log('callPlayer: Frame not found; id=' + frame_id);
+        if (queue) clearInterval(queue.poller);
+    } else if (func === 'listening') {
+        // Sending the "listener" message to the frame, to request status updates
+        if (iframe && iframe.contentWindow) {
+        	func = '{"event":"listening","id":' + JSON.stringify(''+frame_id) + '}';
+        	iframe.contentWindow.postMessage(func, '*');
+        }
+    } else if (!domReady ||
+    	iframe && (!iframe.contentWindow || queue && !queue.ready) ||
+    	(!queue || !queue.ready) && typeof func === 'function') {
+    	if (!queue) queue = callPlayer.queue[frame_id] = [];
+    	queue.push([func, args]);
+    	if (!('poller' in queue)) {
+            // keep polling until the document and frame is ready
+            queue.poller = setInterval(function() {
+            	callPlayer(frame_id, 'listening');
+            }, 250);
+            // Add a global "message" event listener, to catch status updates:
+            messageEvent(1, function runOnceReady(e) {
+            	if (!iframe) {
+            		iframe = document.getElementById(frame_id);
+            		if (!iframe) return;
+            		if (iframe.tagName.toUpperCase() != 'IFRAME') {
+            			iframe = iframe.getElementsByTagName('iframe')[0];
+            			if (!iframe) return;
+            		}
+            	}
+            	if (e.source === iframe.contentWindow) {
+                    // Assume that the player is ready if we receive a
+                    // message from the iframe
+                    clearInterval(queue.poller);
+                    queue.ready = true;
+                    messageEvent(0, runOnceReady);
+                    // .. and release the queue:
+                    while (tmp = queue.shift()) {
+                    	callPlayer(frame_id, tmp[0], tmp[1]);
+                    }
+                }
+            }, false);
+        }
+    } else if (iframe && iframe.contentWindow) {
+        // When a function is supplied, just call it (like "onYouTubePlayerReady")
+        if (func.call) return func();
+        // Frame exists, send message
+        iframe.contentWindow.postMessage(JSON.stringify({
+        	"event": "command",
+        	"func": func,
+        	"args": args || [],
+        	"id": frame_id
+        }), "*");
+    }
+    /* IE8 does not support addEventListener... */
+    function messageEvent(add, listener) {
+    	var w3 = add ? window.addEventListener : window.removeEventListener;
+    	w3 ?
+    	w3('message', listener, !1)
+    	:
+    	(add ? window.attachEvent : window.detachEvent)('onmessage', listener);
+    }
+}
+
+// Example: call play
+// Note that the function automatically queues
+// the request when the DOM/frame is not ready yet
+callPlayer('whateverID', 'playVideo');
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+venv
+sqlite3.exe
+schema.sql
+tmp
+log
+*.pyc

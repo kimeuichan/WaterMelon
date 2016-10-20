@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>워터멜론</title>
+
+	<link type="text/css" rel="stylesheet" href="{{url_for('static', filename='css/materialize.min.css')}}" media="screen,projection"/>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+</head>
+
+<body class="grey lighten-4">
+	<div class="navbar-fixed">
+		<nav class="indigo">
+			<div class="container">
+				<div class="nav-wrapper z-depth-1">
+					<a href="#" data-activates="slide-out" class="button-collapse show-on-large"><i class="mdi-navigation-menu"></i></a>
+					<a href="#!" class="brand-logo">로그인</a>
+					<ul id="slide-out" class="side-nav">
+						<li><a href="/register"><i class="mdi-social-person-add left"></i>회원가입</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+	</div>
+
+	<div class="container">
+		<div class="card-panel">
+			<div class="row">
+				<form class="col s12" method="post">
+					<div class="row">
+						<div class="input-field col s12">
+							<i class="mdi-action-account-circle prefix"></i>
+							<input id="username" type="text" name="username" class="validate">
+							<label for="username">아이디</label>
+						</div>
+					</div>
+					<div class="row">
+						<div class="input-field col s12">
+							<i class="mdi-action-lock prefix"></i>
+							<input id="password" type="password" name="password" class="validate">
+							<label for="password">비밀번호</label>
+						</div>
+					</div>
+					<div class="row">
+						<div class="col m12">
+							<p class="right-align">
+								<button class="btn btn-large waves-effect waves-light pink" type="submit" name="action">로그인<i class="mdi-action-lock-open right"></i></button>
+							</p>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+
+	{% if error %}
+	<script>alert("{{ error }}");</script>
+	{% endif %}
+
+	<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="{{url_for('static', filename='js/materialize.min.js')}}"></script>
+	<script>
+		$(document).ready(function(){
+			$(".button-collapse").sideNav();
+		})
+	</script>
+</body>
+</html>
